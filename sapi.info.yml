@@ -1,5 +1,0 @@
-name: Statistics API
-type: module
-description: 'Provides a Statistics API for use by other modules.'
-package: Statistics
-core: 8.x
