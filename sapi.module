@@ -1,0 +1,123 @@
+<?php
+
+/**
+ * @file
+ * Hooks and functions for the Statistics API module.
+ */
+
+
+/**
+ * Implements hook_menu().
+ */
+function sapi_menu() {
+  // Statistics settings list page.
+  $items['admin/config/statistics'] = array(
+    'title' => 'Statistics',
+    'description' => 'General statistics related configuration.',
+    'position' => 'left',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+
+  // Listing of all declared Stat methods.
+  $items['admin/config/statistics/methods'] = array(
+    'title' => 'Statistics methods',
+    'description' => 'Manage defined statistics methods.',
+    'route_name' => 'sapi_stat_method_overview',
+  );
+
+  // Edit form for an individual Stat method.
+  $items['admin/config/statistics/methods/%stat_method'] = array(
+    'title' => 'Edit statistics methods',
+    'title callback' => 'entity_page_label',
+    'title arguments' => array(4),
+    'route_name' => 'sapi_stat_method_edit',
+  );
+
+  // Local task for the edit form.
+  $items['admin/config/statistics/methods/%stat_method/edit'] = array(
+    'title' => 'Edit',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  // Statistics method enable callback.
+  $items['admin/config/statistics/methods/%stat_method/enable'] = array(
+    'title' => 'Delete',
+    'route_name' => 'sapi_stat_method_enable',
+  );
+
+  // Statistics method disable callback.
+  $items['admin/config/statistics/methods/%stat_method/disable'] = array(
+    'title' => 'Disable',
+    'route_name' => 'sapi_stat_method_disable',
+  );
+
+  return $items;
+}
+
+
+/**
+ * Implements hook_permission().
+ */
+function sapi_permission() {
+  $permissions = array();
+
+  // Expose a master adminster stat methods permission.
+  $permissions['administer statistics methods'] = array(
+    'title' => t('Administer statistics methods'),
+    'description' => t('Configure data collection methods.'),
+    'restrict access' => TRUE,
+  );
+
+  // Expose one permission per stat method.
+  foreach (sapi_get_method_plugins() as $id => $definition) {
+    $t_args = array('%method' => $definition['label']);
+    $permissions['configure ' . $id . ' method'] = array(
+      'title' => t('Configure the %method method', $t_args),
+      'description' => t('Make configuration changes to the %method method.', $t_args),
+    );
+  }
+
+  return $permissions;
+}
+
+
+/**
+ * Implements hook_entity_bundle_info().
+ */
+function sapi_entity_bundle_info() {
+  $bundles = array();
+
+  // For each Statistics method plugin defined, note a Stat entity bundle.
+  foreach (sapi_get_method_plugins() as $id => $definition) {
+    $bundles['stat'][$id]['label'] = $definition['label'];
+  }
+
+  return $bundles;
+}
+
+
+/**
+ * Implements hook_cron().
+ */
+function sapi_cron() {
+  // Loop through defined stat methods and call manageData().
+  $manager = Drupal::getContainer()->get('plugin.manager.sapi.method');
+  foreach (sapi_get_method_plugins() as $id => $definition) {
+    $method = $manager->createInstance($id);
+    $method->manageData();
+  }
+}
+
+
+/**
+ * Helper function to get a list of statistics method plugin definitions.
+ */
+function sapi_get_method_plugins() {
+  $container = Drupal::getContainer();
+  $plugin = $container->get('plugin.manager.sapi.method');
+
+  return $plugin->getDefinitions();
+}

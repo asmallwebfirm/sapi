@@ -1,0 +1,4 @@
+services:
+  plugin.manager.sapi.method:
+    class: Drupal\sapi\Plugin\StatPluginManager
+    arguments: [method, '@container.namespaces', '@plugin.manager.entity', '@config.factory']
