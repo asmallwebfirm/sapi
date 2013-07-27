@@ -10,6 +10,7 @@ namespace Drupal\sapi;
 use Drupal\Core\Entity\EntityStorageControllerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Plugin\PluginManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Entity\EntityInterface;
@@ -53,6 +54,13 @@ class StatMethodStorageController extends EntityStorageControllerBase {
   protected $configStorage;
 
   /**
+   * The module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * The entity query factory.
    *
    * @var \Drupal\Core\Entity\Query\QueryFactory
@@ -68,6 +76,7 @@ class StatMethodStorageController extends EntityStorageControllerBase {
       $entity_info,
       $container->get('plugin.manager.sapi.method'),
       $container->get('config.factory'),
+      $container->get('module_handler'),
       $container->get('entity.query')
     );
   }
@@ -83,14 +92,17 @@ class StatMethodStorageController extends EntityStorageControllerBase {
    *   The plugin manager to be used.
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
    *   The config factory service.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler service.
    * @param \Drupal\Core\Config\StorageInterface $config_storage
    *   The config storage service.
    */
-  public function __construct($entity_type, array $entity_info, PluginManagerInterface $manager, ConfigFactory $config_factory, QueryFactory $entity_query_factory) {
+  public function __construct($entity_type, array $entity_info, PluginManagerInterface $manager, ConfigFactory $config_factory, ModuleHandlerInterface $module_handler, QueryFactory $entity_query_factory) {
     parent::__construct($entity_type, $entity_info);
 
     $this->manager = $manager;
     $this->configFactory = $config_factory;
+    $this->moduleHandler = $module_handler;
     $this->entityQueryFactory = $entity_query_factory;
 
     // Check if the entity type supports IDs.
@@ -222,7 +234,7 @@ class StatMethodStorageController extends EntityStorageControllerBase {
    */
   protected function attachLoad(&$built_entities, $load_revision = FALSE) {
     // Call hook_entity_load().
-    foreach (module_implements('entity_load') as $module) {
+    foreach ($this->moduleHandler->getImplementations('entity_load') as $module) {
       $function = $module . '_entity_load';
       $function($built_entities, $this->entityType);
     }
@@ -231,7 +243,7 @@ class StatMethodStorageController extends EntityStorageControllerBase {
     // always the queried entities, followed by additional arguments set in
     // $this->hookLoadArguments.
     $args = array_merge(array($built_entities), $this->hookLoadArguments);
-    foreach (module_implements($this->entityType . '_load') as $module) {
+    foreach ($this->moduleHandler->getImplementations($this->entityType . '_load') as $module) {
       call_user_func_array($module . '_' . $this->entityType . '_load', $args);
     }
   }
@@ -364,9 +376,9 @@ class StatMethodStorageController extends EntityStorageControllerBase {
    */
   protected function invokeHook($hook, EntityInterface $entity) {
     // Invoke the hook.
-    module_invoke_all($this->entityType . '_' . $hook, $entity);
+    $this->moduleHandler->invokeAll($this->entityType . '_' . $hook, array($entity));
     // Invoke the respective entity-level hook.
-    module_invoke_all('entity_' . $hook, $entity, $this->entityType);
+    $this->moduleHandler->invokeAll('entity_' . $hook, array($entity, $this->entityType));
   }
 
 }
