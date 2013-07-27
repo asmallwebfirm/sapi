@@ -104,7 +104,7 @@ function sapi_entity_bundle_info() {
  */
 function sapi_cron() {
   // Loop through defined stat methods and call manageData().
-  $manager = Drupal::getContainer()->get('plugin.manager.sapi.method');
+  $manager = Drupal::service('plugin.manager.sapi.method');
   foreach (sapi_get_method_plugins() as $id => $definition) {
     $method = $manager->createInstance($id);
     $method->manageData();
@@ -116,8 +116,7 @@ function sapi_cron() {
  * Helper function to get a list of statistics method plugin definitions.
  */
 function sapi_get_method_plugins() {
-  $container = Drupal::getContainer();
-  $plugin = $container->get('plugin.manager.sapi.method');
+  $plugin = Drupal::service('plugin.manager.sapi.method');
 
   return $plugin->getDefinitions();
 }
