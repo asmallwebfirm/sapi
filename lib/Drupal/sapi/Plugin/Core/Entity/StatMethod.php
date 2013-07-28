@@ -77,22 +77,6 @@ class StatMethod extends ConfigEntityBase implements StatMethodInterface {
   public $settings = array();
 
   /**
-   * The statistics method plugin manager.
-   *
-   * @var \Drupal\Component\Plugin\PluginManagerInterface
-   */
-  protected $pluginManager;
-
-  /**
-   * Overrides \Drupal\Core\Config\Entity\ConfigEntityBase::__construct().
-   */
-  public function __construct(array $values, $entity_type) {
-    parent::__construct($values, $entity_type);
-
-    $this->pluginManager = \Drupal::service('plugin.manager.sapi.method');
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function uri() {
@@ -113,19 +97,6 @@ class StatMethod extends ConfigEntityBase implements StatMethodInterface {
       return $this->settings[$module];
     }
     return array();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function save() {
-    // Save the entity as usual.
-    $return = parent::save();
-
-    // Changes to stat method entities require a cache clear of related plugins.
-    $this->pluginManager->clearCachedDefinitions();
-
-    return $return;
   }
 
   /**

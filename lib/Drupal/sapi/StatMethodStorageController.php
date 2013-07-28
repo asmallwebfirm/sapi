@@ -322,6 +322,9 @@ class StatMethodStorageController extends EntityStorageControllerBase {
 
     unset($entity->original);
 
+    // Ensure the plugin manager has the most up-to-date Stat Methods.
+    $this->manager->clearCachedDefinitions();
+
     return SAVED_UPDATED;
   }
 
