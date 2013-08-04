@@ -25,7 +25,7 @@ class StatMethodAccessController extends EntityAccessController {
     if ($operation == 'delete') {
       return FALSE;
     }
-    return user_access('administer statistics methods', $account);
+    return $account->hasPermission('administer statistics methods');
   }
 
 }
