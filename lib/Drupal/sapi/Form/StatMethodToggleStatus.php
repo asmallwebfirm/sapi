@@ -7,16 +7,16 @@
 
 namespace Drupal\sapi\Form;
 
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityConfirmFormBase;
-use Drupal\Core\Entity\EntityControllerInterface;
-use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Routing\RouteProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a form for statistics method one-click enablement/disablement.
  */
-class StatMethodToggleStatus extends EntityConfirmFormBase implements EntityControllerInterface {
+class StatMethodToggleStatus extends EntityConfirmFormBase implements ContainerInjectionInterface {
 
   /**
    * The request object.
@@ -26,6 +26,12 @@ class StatMethodToggleStatus extends EntityConfirmFormBase implements EntityCont
   protected $request;
 
   /**
+   * The route provider object.
+   * @var \Drupal\Core\Routing\RouteProviderInterface
+   */
+  protected $router;
+
+  /**
    * The toggle value for this particular request.
    */
   protected $toggle;
@@ -33,14 +39,12 @@ class StatMethodToggleStatus extends EntityConfirmFormBase implements EntityCont
   /**
    * Constructs a new NodeTypeDeleteConfirm object.
    *
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface
-   *   The module handler service.
    * @param \Drupal\Core\Database\Connection $database
    *   The database connection.
    */
-  public function __construct(ModuleHandlerInterface $module_handler, Request $request) {
-    parent::__construct($module_handler);
+  public function __construct(Request $request, RouteProviderInterface $routeProvider) {
     $this->request = $request;
+    $this->routeProvider = $routeProvider;
     $path_parts = explode('/', $this->request->getPathInfo());
     $this->toggle = array_pop($path_parts);
   }
@@ -48,10 +52,10 @@ class StatMethodToggleStatus extends EntityConfirmFormBase implements EntityCont
   /**
    * {@inheritdoc}
    */
-  public static function createInstance(ContainerInterface $container, $entity_type, array $entity_info) {
+  public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('module_handler'),
-      $container->get('request')
+      $container->get('request'),
+      $container->get('router.route_provider')
     );
   }
 
@@ -70,8 +74,20 @@ class StatMethodToggleStatus extends EntityConfirmFormBase implements EntityCont
   /**
    * {@inheritdoc}
    */
+  public function getCancelRoute() {
+    return array('route_name' => 'sapi_stat_method_overview');
+  }
+
+  /**
+   * Returns the path used as the "cancel" link for this controller.
+   *
+   * @return string
+   *   The cancellation path for this controller.
+   */
   public function getCancelPath() {
-    return 'admin/config/statistics/methods';
+    $cancel_route = $this->getCancelRoute();
+    $route_name = $cancel_route['route_name'];
+    return $this->routeProvider->getRouteByName($route_name)->getPath();
   }
 
   /**

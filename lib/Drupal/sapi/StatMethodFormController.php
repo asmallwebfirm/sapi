@@ -7,16 +7,16 @@
 
 namespace Drupal\sapi;
 
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Entity\EntityFormController;
-use Drupal\Core\Entity\EntityControllerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form controller for statistic method forms.
  */
-class StatMethodFormController extends EntityFormController implements EntityControllerInterface {
+class StatMethodFormController extends EntityFormController implements ContainerInjectionInterface {
 
   /**
    * The plugin manager service.
@@ -35,7 +35,7 @@ class StatMethodFormController extends EntityFormController implements EntityCon
   /**
    * {@inheritdoc}
    */
-  public static function createInstance(ContainerInterface $container, $entity_type, array $entity_info) {
+  public static function create(ContainerInterface $container) {
     return new static(
       $container->get('module_handler'),
       $container->get('plugin.manager.sapi.method')

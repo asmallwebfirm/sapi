@@ -6,14 +6,12 @@
  */
 
 
-namespace Drupal\sapi\Plugin\Core\Entity;
+namespace Drupal\sapi\Entity;
 
-use Drupal\Core\Entity\Annotation\EntityType;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
-use Drupal\Core\Entity\DatabaseStorageController;
-use Drupal\Core\Entity\EntityNG;
+use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\TypedData\FALSE;
 use Drupal\sapi\StatInterface;
-use Drupal\Core\Annotation\Translation;
 
 
 /**
@@ -30,7 +28,7 @@ use Drupal\Core\Annotation\Translation;
  *   base_table = "stat",
  *   controllers = {
  *     "storage" = "Drupal\sapi\StatStorageController",
- *     "render" = "Drupal\sapi\StatRenderController"
+ *     "render" = "Drupal\Core\Entity\EntityRenderController"
  *   },
  *   route_base_path = "admin/config/statistics/methods/{bundle}",
  *   menu_view_path = "stat/{bundle}/{stat}",
@@ -46,7 +44,7 @@ use Drupal\Core\Annotation\Translation;
  *   }
  * )
  */
-class Stat extends EntityNG implements StatInterface {
+class Stat extends ContentEntityBase implements \IteratorAggregate, StatInterface {
 
   /**
    * Implements Drupal\Core\Entity\EntityInterface::id().
@@ -62,4 +60,28 @@ class Stat extends EntityNG implements StatInterface {
     $this->set('created', REQUEST_TIME);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public static function baseFieldDefinitions($entity_type) {
+    $properties['sid'] = array(
+      'label' => t('Stat ID'),
+      'description' => t('The stat ID.'),
+      'type' => 'integer_field',
+      'read-only' => TRUE,
+    );
+    $properties['method'] = array(
+      'label' => t('Method'),
+      'description' => t('The stat method.'),
+      'type' => 'string_field',
+      'read-only' => TRUE,
+    );
+    $properties['created'] = array(
+      'label' => t('Created'),
+      'description' => t('The time that the stat was created.'),
+      'type' => 'integer_field',
+    );
+
+    return $properties;
+  }
 }

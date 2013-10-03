@@ -1,5 +1,5 @@
 sapi_stat_method_overview:
-  pattern: '/admin/config/statistics/methods'
+  path: '/admin/config/statistics/methods'
   defaults:
     _content: '\Drupal\Core\Entity\Controller\EntityListController::listing'
     entity_type: 'stat_method'
@@ -7,28 +7,28 @@ sapi_stat_method_overview:
     _permission: 'administer statistics methods'
 
 sapi_stat_method_edit:
-  pattern: '/admin/config/statistics/methods/{stat_method}'
+  path: '/admin/config/statistics/methods/{stat_method}'
   defaults:
     _entity_form: 'stat_method.edit'
   requirements:
     _permission: 'administer statistics methods'
 
 sapi_stat_method_edit_default:
-  pattern: '/admin/config/statistics/methods/{stat_method}/edit'
+  path: '/admin/config/statistics/methods/{stat_method}/edit'
   defaults:
     _entity_form: 'stat_method.edit'
   requirements:
     _permission: 'administer statistics methods'
 
 sapi_stat_method_enable:
-  pattern: '/admin/config/statistics/methods/{stat_method}/enable'
+  path: '/admin/config/statistics/methods/{stat_method}/enable'
   defaults:
     _entity_form: 'stat_method.toggle_status'
   requirements:
     _entity_access: 'stat_method.update'
 
 sapi_stat_method_disable:
-  pattern: '/admin/config/statistics/methods/{stat_method}/disable'
+  path: '/admin/config/statistics/methods/{stat_method}/disable'
   defaults:
     _entity_form: 'stat_method.toggle_status'
   requirements:

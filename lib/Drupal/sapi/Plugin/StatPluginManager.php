@@ -34,9 +34,11 @@ class StatPluginManager extends PluginManagerBase {
    *   
    */
   public function __construct($type, \Traversable $namespaces, EntityManager $entity_manager, ConfigFactory $config) {
-    $this->discovery = new StatAnnotatedClassDiscovery('Plugin/Stat/' . $type, $namespaces, $entity_manager, $config);
+    $subdir = 'Plugin/Stat/' . $type;
+    $annotation_class = 'Drupal\sapi\Annotation\Stat' . ucfirst($type);
+    $this->discovery = new StatAnnotatedClassDiscovery($subdir, $namespaces, $entity_manager, $config, $annotation_class);
     $this->discovery = new DerivativeDiscoveryDecorator($this->discovery);
-    $this->discovery = new AlterDecorator($this->discovery, 'sapi_plugins_' . $type);
+    $this->discovery = new AlterDecorator($this->discovery, 'sapi_' . $type . '_info');
     $this->discovery = new CacheDecorator($this->discovery, 'sapi:' . $type, 'cache');
 
     $this->factory = new ContainerFactory($this);

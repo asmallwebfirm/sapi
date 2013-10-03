@@ -19,31 +19,6 @@ use Drupal\Core\Entity\EntityInterface;
 class StatStorageController extends DatabaseStorageControllerNG {
 
   /**
-   * Overrides \Drupal\Core\Entity\DataBaseStorageControllerNG::basePropertyDefinitions().
-   */
-  public function baseFieldDefinitions() {
-    $properties['sid'] = array(
-      'label' => t('Stat ID'),
-      'description' => t('The stat ID.'),
-      'type' => 'integer_field',
-      'read-only' => TRUE,
-    );
-    $properties['method'] = array(
-      'label' => t('Method'),
-      'description' => t('The stat method.'),
-      'type' => 'string_field',
-      'read-only' => TRUE,
-    );
-    $properties['created'] = array(
-      'label' => t('Created'),
-      'description' => t('The time that the stat was created.'),
-      'type' => 'integer_field',
-    );
-
-    return $properties;
-  }
-
-  /**
    * Returns a list of entities that match any number of entity property
    * conditions with arbitrary operators.
    *

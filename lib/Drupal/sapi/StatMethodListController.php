@@ -11,7 +11,7 @@ use Drupal\Core\Entity\EntityControllerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Routing\PathBasedGeneratorInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Component\Utility\Xss;
 use Drupal\Component\Utility\String;
@@ -42,7 +42,7 @@ class StatMethodListController extends ConfigEntityListController implements Ent
    * @param \Drupal\Core\Routing\PathBasedGeneratorInterface $url_generator
    *   The url generator service.
    */
-  public function __construct($entity_type, array $entity_info, EntityStorageControllerInterface $storage, ModuleHandlerInterface $module_handler, PathBasedGeneratorInterface $url_generator) {
+  public function __construct($entity_type, array $entity_info, EntityStorageControllerInterface $storage, ModuleHandlerInterface $module_handler, UrlGeneratorInterface $url_generator) {
     parent::__construct($entity_type, $entity_info, $storage, $module_handler);
     $this->urlGenerator = $url_generator;
   }

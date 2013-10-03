@@ -5,14 +5,12 @@
  * Contains \Drupal\sapi\Plugin\Core\Entity\StatMethod.
  */
 
-namespace Drupal\sapi\Plugin\Core\Entity;
+namespace Drupal\sapi\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\sapi\StatMethodInterface;
 use Drupal\Component\Plugin\PluginManagerInterface;
-use Drupal\Core\Entity\Annotation\EntityType;
-use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityStorageException;
 
 
@@ -32,7 +30,11 @@ use Drupal\Core\Entity\EntityStorageException;
  *       "toggle_status" = "Drupal\sapi\Form\StatMethodToggleStatus"
  *     },
  *   },
+ *   links = {
+ *     "edit-form" = "admin/config/statistics/methods/{stat_method}"
+ *   },
  *   config_prefix = "stat.method",
+ *   bundle_of = "stat",
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label",
@@ -75,19 +77,6 @@ class StatMethod extends ConfigEntityBase implements StatMethodInterface {
    * @var array
    */
   public $settings = array();
-
-  /**
-   * {@inheritdoc}
-   */
-  public function uri() {
-    return array(
-      'path' => 'admin/config/statistics/methods/' . $this->id(),
-      'options' => array(
-        'entity_type' => $this->entityType,
-        'entity' => $this,
-      ),
-    );
-  }
 
   /**
    * {@inheritdoc}
