@@ -123,18 +123,26 @@ abstract class StatPluginMethodBase extends PluginBase implements StatPluginMeth
       // Delete the queried entities.
       try {
         $this->entityManager->getStorageController('stat')->delete($entities);
-        $settings = $this->settings();
-        watchdog('sapi', 'Successfully removed !num %method stats.', array(
-          '!num' => count($entities),
-          '%method' => $settings['label'],
-        ), WATCHDOG_NOTICE);
+        // Wrapper for watchdog exists (for unit testing).
+        // @todo Remove when watchdog is an injectable service, or similar.
+        if (defined('WATCHDOG_NOTICE')) {
+          $settings = $this->settings();
+          watchdog('sapi', 'Successfully removed !num %method stats.', array(
+            '!num' => count($entities),
+            '%method' => $settings['label'],
+          ), WATCHDOG_NOTICE);
+        }
       }
       catch (EntityStorageException $e) {
-        $settings = $this->settings();
-        watchdog('sapi', 'Failed to delete %method stat data with message: !message', array(
-          '%method' => $settings['label'],
-          '!message' => $e->getMessage(),
-        ), WATCHDOG_ERROR);
+        // Wrapper for watchdog exists (for unit testing).
+        // @todo Remove when watchdog is an injectable service, or similar.
+        if (defined('WATCHDOG_ERROR')) {
+          $settings = $this->settings();
+          watchdog('sapi', 'Failed to delete %method stat data with message: !message', array(
+             '%method' => $settings['label'],
+             '!message' => $e->getMessage(),
+          ), WATCHDOG_ERROR);
+        }
       }
     }
   }
@@ -339,7 +347,7 @@ abstract class StatPluginMethodBase extends PluginBase implements StatPluginMeth
    *
    * @see \Drupal\sapi\StatPluginMethodBase::$configuration
    */
-  protected function setConfig($key, $value) {
+  public function setConfig($key, $value) {
     $this->configuration[$key] = $value;
   }
 
@@ -357,7 +365,7 @@ abstract class StatPluginMethodBase extends PluginBase implements StatPluginMeth
    *
    * @see \Drupal\sapi\StatPluginMethodBase::$configuration
    */
-  protected function getConfig($key = NULL) {
+  public function getConfig($key = NULL) {
     if ($key === NULL) {
       return $this->configuration;
     }
@@ -376,7 +384,7 @@ abstract class StatPluginMethodBase extends PluginBase implements StatPluginMeth
    * @param mixed $value
    *   The value to set for the provided key.
    */
-  protected function setModuleConfig($module, $key, $value) {
+  public function setModuleConfig($module, $key, $value) {
     $this->configuration['settings'][$module][$key] = $value;
   }
 
@@ -395,7 +403,7 @@ abstract class StatPluginMethodBase extends PluginBase implements StatPluginMeth
    *   key specified is returned; if there is nothing to return, an empty value
    *   of the appropriate type is returned.
    */
-  protected function getModuleConfig($module = NULL, $key = NULL) {
+  public function getModuleConfig($module = NULL, $key = NULL) {
     $config = $this->getConfig('settings');
     if ($module === NULL) {
       return !empty($config) ? $config : array();
