@@ -2,20 +2,20 @@
 
 /**
  * @file
- * PHPUnit tests for \Drupal\sapi\Plugin\StatAnnotatedClassDiscovery.
+ * PHPUnit tests for \Drupal\sapi\Plugin\StatMethodAnnotatedClassDiscovery.
  */
 
 namespace Drupal\sapi\Tests;
 
 use Drupal\Tests\UnitTestCase;
-use Drupal\sapi\Plugin\StatAnnotatedClassDiscovery;
+use Drupal\sapi\Plugin\StatMethodAnnotatedClassDiscovery;
 
 /**
  * Tests the Statistics Method annotated class discovery.
  *
  * @group SAPI
  */
-class StatAnnotatedClassDiscoveryTest extends UnitTestCase {
+class StatMethodAnnotatedClassDiscoveryTest extends UnitTestCase {
 
   /**
    * Stub definition of a StatMethod entity.
@@ -74,7 +74,7 @@ class StatAnnotatedClassDiscoveryTest extends UnitTestCase {
       ->will($this->returnValue(array($config)));
 
     // Instantiate the discovery class and get all definitions.
-    $discovery = new StatAnnotatedClassDiscovery('Stat/method', $namespaces, $entity_manager, $config_factory);
+    $discovery = new StatMethodAnnotatedClassDiscovery('Stat/method', $namespaces, $entity_manager, $config_factory);
     $definitions = $discovery->getDefinitions();
 
     // @todo It would be ideal to test the actual merger of annotated class

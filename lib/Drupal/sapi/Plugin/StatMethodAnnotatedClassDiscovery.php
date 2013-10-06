@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\Component\Plugin\Discovery\AnnotatedClassDiscovery.
+ * Contains Drupal\sapi\Plugin\StatMethodAnnotatedClassDiscovery.
  */
 
 namespace Drupal\sapi\Plugin;
@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\Container;
  * Overrides Core's default annotated class discovery mechanism to include
  * config data when providing a plugin's definition.
  */
-class StatAnnotatedClassDiscovery extends AnnotatedClassDiscovery {
+class StatMethodAnnotatedClassDiscovery extends AnnotatedClassDiscovery {
 
   /**
    * The entity manager.
@@ -34,7 +34,7 @@ class StatAnnotatedClassDiscovery extends AnnotatedClassDiscovery {
   protected $configFactory;
 
   /**
-   * Constructs a StatAnnotatedClassDiscovery object.
+   * Constructs a StatMethodAnnotatedClassDiscovery object.
    *
    * @param string $subdir
    *   The plugin's subdirectory, for example Stat/method.

@@ -8,9 +8,7 @@
 namespace Drupal\sapi\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\sapi\StatMethodInterface;
-use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Entity\EntityStorageException;
 
 

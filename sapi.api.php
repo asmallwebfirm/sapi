@@ -35,5 +35,19 @@ function hook_sapi_method_info_alter(&$info) {
 }
 
 /**
+ * Modify Stat Data definitions.
+ *
+ * @param array $info
+ *   An associative array of Stat Data definitions, keyed by Stat Data ID.
+ *
+ * @see \Drupal\sapi\Annotation\StatData
+ * @see \Drupal\sapi\Plugin\StatPluginManager
+ */
+function hook_sapi_data_info_alter(&$info) {
+  // Modify the default Stat Data description.
+  $info['my_data']['description'] = t('My new description.');
+}
+
+/**
  * @} End of "addtogroup hooks".
  */

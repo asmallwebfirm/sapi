@@ -100,7 +100,21 @@ function sapi_entity_bundle_info() {
 
 
 /**
+ * Implements hook_schema_alter().
+ */
+function sapi_schema_alter(&$schema) {
+  // Retrieve and indicate all active plugins
+  $plugins = sapi_get_data_plugins();
+  foreach ($plugins as $id => $definition) {
+    $schema['stat']['fields'][$id] = $definition['schema'];
+  }
+}
+
+
+/**
  * Implements hook_cron().
+ *
+ * @todo Needs tests.
  */
 function sapi_cron() {
   // Loop through defined stat methods and call manageData().
@@ -113,10 +127,58 @@ function sapi_cron() {
 
 
 /**
- * Helper function to get a list of statistics method plugin definitions.
+ * Implements hook_modules_uninstalled().
+ *
+ * @todo Needs tests.
  */
-function sapi_get_method_plugins() {
+function sapi_modules_uninstalled($modules) {
+  $plugins = Drupal::state()->get('sapi_data_plugin_purgatory') ?: array();
+  $modules = array_flip($modules);
+
+  // Loop through the data plugins.
+  foreach (sapi_get_data_plugins() as $plugin => $definition) {
+    // If an uninstalled module matches, remove its property from storage.
+    if (isset($modules[$definition['provider']])) {
+      \Drupal::entityManager()->getStorageController('stat')->ensureNoProperty($plugin);
+    }
+  }
+}
+
+
+/**
+ * Helper function to get a list of statistics method plugin definitions.
+ *
+ * @param boolean $clear_cache
+ *   Optional: Whether or not the plugin definition cache should be flushed.
+ *
+ * @return array
+ *   An array of Statistics method plugins, keyed by plugin ID.
+ */
+function sapi_get_method_plugins($clear_cache = FALSE) {
   $plugin = Drupal::service('plugin.manager.sapi.method');
+
+  if ($clear_cache) {
+    $plugin->clearCachedDefinitions();
+  }
+
+  return $plugin->getDefinitions();
+}
+
+/**
+ * Helper function to get a list of statistics data plugin definitions.
+ *
+ * @param boolean $clear_cache
+ *   Optional: Whether or not the plugin definition cache should be flushed.
+ *
+ * @return array
+ *   An array of Statistics data plugins, keyed by plugin ID.
+ */
+function sapi_get_data_plugins($clear_cache = FALSE) {
+  $plugin = Drupal::service('plugin.manager.sapi.data');
+
+  if ($clear_cache) {
+    $plugin->clearCachedDefinitions();
+  }
 
   return $plugin->getDefinitions();
 }
