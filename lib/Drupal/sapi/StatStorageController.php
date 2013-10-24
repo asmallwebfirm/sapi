@@ -7,9 +7,8 @@
 
 namespace Drupal\sapi;
 
-use Drupal\field\FieldInfo;
 use Drupal\Core\Database\Connection;
-use Drupal\Core\Entity\DatabaseStorageControllerNG;
+use Drupal\Core\Entity\DatabaseStorageController;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Component\Uuid\UuidInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -20,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * This extends the Drupal\Core\Entity\DatabaseStorageController class, adding
  * required special handling for Stat entities.
  */
-class StatStorageController extends DatabaseStorageControllerNG implements StatStorageControllerInterface {
+class StatStorageController extends DatabaseStorageController implements StatStorageControllerInterface {
 
   /**
    * The Entity Query factory service.
@@ -37,7 +36,6 @@ class StatStorageController extends DatabaseStorageControllerNG implements StatS
       $entity_type,
       $entity_info,
       $container->get('database'),
-      $container->get('field.info'),
       $container->get('uuid'),
       $container->get('entity.query')
     );
@@ -55,8 +53,8 @@ class StatStorageController extends DatabaseStorageControllerNG implements StatS
    * @param \Drupal\Core\Entity\Query\QueryFactory $entity_query
    *   The Entity Query factory service to be used.
    */
-  public function __construct($entity_type, array $entity_info, Connection $connection, FieldInfo $field_info, UuidInterface $uuid_service, QueryFactory $query_factory) {
-    parent::__construct($entity_type, $entity_info, $connection, $field_info, $uuid_service);
+  public function __construct($entity_type, array $entity_info, Connection $connection, UuidInterface $uuid_service, QueryFactory $query_factory) {
+    parent::__construct($entity_type, $entity_info, $connection, $uuid_service);
     $this->query_factory = $query_factory;
   }
 

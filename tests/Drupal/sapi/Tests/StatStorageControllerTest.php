@@ -48,9 +48,6 @@ class StatStorageControllerTest extends UnitTestCase {
     $db = $this->getMockBuilder('Drupal\Core\Database\Connection')
       ->disableOriginalConstructor()
       ->getMock();
-    $field = $this->getMockBuilder('Drupal\field\FieldInfo')
-      ->disableOriginalConstructor()
-      ->getMock();
     $uuid = $this->getMock('Drupal\Component\Uuid\UuidInterface');
     $eq = $this->getMockBuilder('Drupal\Core\Entity\Query\QueryFactory')
       ->disableOriginalConstructor()
@@ -75,7 +72,7 @@ class StatStorageControllerTest extends UnitTestCase {
 
     // Instantiate a mock of our StatStorageController.
     $controller = $this->getMockBuilder('Drupal\sapi\StatStorageController')
-      ->setConstructorArgs(array('stat', $this->entity_info, $db, $field, $uuid, $eq))
+      ->setConstructorArgs(array('stat', $this->entity_info, $db, $uuid, $eq))
       ->setMethods(array('loadMultiple'))
       ->getMock();
 
@@ -98,9 +95,6 @@ class StatStorageControllerTest extends UnitTestCase {
 
     // Stub database connection.
     $db = $this->getMockBuilder('Drupal\Core\Database\Connection')
-      ->disableOriginalConstructor()
-      ->getMock();
-    $field = $this->getMockBuilder('Drupal\field\FieldInfo')
       ->disableOriginalConstructor()
       ->getMock();
     $uuid = $this->getMock('Drupal\Component\Uuid\UuidInterface');
@@ -128,7 +122,7 @@ class StatStorageControllerTest extends UnitTestCase {
       ->will($this->returnValue($schema));
 
     // Instantiate and test the method.
-    $controller = new StatStorageController('stat', $this->entity_info, $db, $field, $uuid, $eq);
+    $controller = new StatStorageController('stat', $this->entity_info, $db, $uuid, $eq);
     $controller->ensureProperty($plugin_id, $plugin_schema);
   }
 
@@ -141,9 +135,6 @@ class StatStorageControllerTest extends UnitTestCase {
 
     // Stub database connection.
     $db = $this->getMockBuilder('Drupal\Core\Database\Connection')
-      ->disableOriginalConstructor()
-      ->getMock();
-    $field = $this->getMockBuilder('Drupal\field\FieldInfo')
       ->disableOriginalConstructor()
       ->getMock();
     $uuid = $this->getMock('Drupal\Component\Uuid\UuidInterface');
@@ -171,7 +162,7 @@ class StatStorageControllerTest extends UnitTestCase {
       ->will($this->returnValue($schema));
 
     // Instantiate and test the method.
-    $controller = new StatStorageController('stat', $this->entity_info, $db, $field, $uuid, $eq);
+    $controller = new StatStorageController('stat', $this->entity_info, $db, $uuid, $eq);
     $controller->ensureNoProperty($plugin_id);
   }
 }
