@@ -49,9 +49,10 @@ class StatMethodPluginBaseTest extends UnitTestCase {
     $entity_manager = $this->getMockBuilder('Drupal\Core\Entity\EntityManager')
       ->disableOriginalConstructor()
       ->getMock();
+    $translation = $this->getMock('\Drupal\Core\StringTranslation\TranslationInterface');
 
     $plugin = $this->getMockForAbstractClass('Drupal\sapi\StatPluginMethodBase', array(
-      $this->pluginConfig, $this->pluginId, $this->pluginDefinition, $entity_manager, $request
+      $this->pluginConfig, $this->pluginId, $this->pluginDefinition, $entity_manager, $request, $translation
     ));
 
     // Test the \Drupal\sapi\StatMethodPluginBase::settings() method.
@@ -78,9 +79,10 @@ class StatMethodPluginBaseTest extends UnitTestCase {
     $entity_manager = $this->getMockBuilder('Drupal\Core\Entity\EntityManager')
       ->disableOriginalConstructor()
       ->getMock();
+    $translation = $this->getMock('\Drupal\Core\StringTranslation\TranslationInterface');
 
     $plugin = $this->getMockForAbstractClass('Drupal\sapi\StatPluginMethodBase', array(
-      $this->pluginConfig, $this->pluginId, $this->pluginDefinition, $entity_manager, $request
+      $this->pluginConfig, $this->pluginId, $this->pluginDefinition, $entity_manager, $request, $translation
     ));
 
     // Test the \Drupal\sapi\StatMethodPluginBase::setConfig() method.
@@ -101,12 +103,13 @@ class StatMethodPluginBaseTest extends UnitTestCase {
     $entity_manager = $this->getMockBuilder('Drupal\Core\Entity\EntityManager')
       ->disableOriginalConstructor()
       ->getMock();
+    $translation = $this->getMock('\Drupal\Core\StringTranslation\TranslationInterface');
     $headerbag = $this->getMock('Symfony\Component\HttpFoundation\HeaderBag');
 
     // Instantiate a plugin with no headers.
     $request->headers = $headerbag;
     $plugin = $this->getMockForAbstractClass('Drupal\sapi\StatPluginMethodBase', array(
-      $this->pluginConfig, $this->pluginId, $this->pluginDefinition, $entity_manager, $request
+      $this->pluginConfig, $this->pluginId, $this->pluginDefinition, $entity_manager, $request, $translation
     ));
 
     // Ensure that plugins are not restricted by "default".
@@ -136,7 +139,7 @@ class StatMethodPluginBaseTest extends UnitTestCase {
       ->getMock();
     $request->headers = $headerbag_dnt;
     $plugin_dnt = $this->getMockForAbstractClass('Drupal\sapi\StatPluginMethodBase', array(
-      $this->pluginConfig, $this->pluginId, $this->pluginDefinition, $entity_manager, $request
+      $this->pluginConfig, $this->pluginId, $this->pluginDefinition, $entity_manager, $request, $translation
     ));
 
     // Ensure that HeaderBag::get('dnt') is called once.
@@ -178,6 +181,7 @@ class StatMethodPluginBaseTest extends UnitTestCase {
     $entity_manager = $this->getMockBuilder('Drupal\Core\Entity\EntityManager')
       ->disableOriginalConstructor()
       ->getMock();
+    $translation = $this->getMock('\Drupal\Core\StringTranslation\TranslationInterface');
 
     // Ensure the entity manager's getStorageController() method is called once
     // with the argument "stat."
@@ -194,7 +198,7 @@ class StatMethodPluginBaseTest extends UnitTestCase {
 
     // Instantiate the plugin and call the collect() method.
     $plugin = $this->getMockForAbstractClass('Drupal\sapi\StatPluginMethodBase', array(
-      $this->pluginConfig, $this->pluginId, $this->pluginDefinition, $entity_manager, $request
+      $this->pluginConfig, $this->pluginId, $this->pluginDefinition, $entity_manager, $request, $translation
     ));
     $plugin->collect();
   }
@@ -211,6 +215,7 @@ class StatMethodPluginBaseTest extends UnitTestCase {
       ->disableOriginalConstructor()
       ->getMock();
     $entity_manager = clone $entity_manager_disabled;
+    $translation = $this->getMock('\Drupal\Core\StringTranslation\TranslationInterface');
 
     // Ensure that, when SAPI retention length is 0, no code is run.
     $entity_manager_disabled
@@ -218,7 +223,7 @@ class StatMethodPluginBaseTest extends UnitTestCase {
       ->method('getStorageController');
 
     $plugin = $this->getMockForAbstractClass('Drupal\sapi\StatPluginMethodBase', array(
-      $this->pluginConfig, $this->pluginId, $this->pluginDefinition, $entity_manager, $request
+      $this->pluginConfig, $this->pluginId, $this->pluginDefinition, $entity_manager, $request, $translation
     ));
     $plugin->manageData();
 
@@ -240,7 +245,7 @@ class StatMethodPluginBaseTest extends UnitTestCase {
       ->method('delete');
 
     $plugin = $this->getMockForAbstractClass('Drupal\sapi\StatPluginMethodBase', array(
-      $this->pluginConfig, $this->pluginId, $this->pluginDefinition, $entity_manager, $request
+      $this->pluginConfig, $this->pluginId, $this->pluginDefinition, $entity_manager, $request, $translation
     ));
     $plugin->setModuleConfig('sapi', 'retention_length', 60);
     $plugin->manageData();

@@ -46,6 +46,12 @@ use Drupal\sapi\StatInterface;
 class Stat extends ContentEntityBase implements \IteratorAggregate, StatInterface {
 
   /**
+   * The string translation service.
+   * @var \Drupal\Core\StringTranslation\TranslationInterface
+   */
+  protected $stringTranslation;
+
+  /**
    * Implements Drupal\Core\Entity\EntityInterface::id().
    */
   public function id() {
@@ -64,20 +70,20 @@ class Stat extends ContentEntityBase implements \IteratorAggregate, StatInterfac
    */
   public static function baseFieldDefinitions($entity_type) {
     $properties['sid'] = array(
-      'label' => t('Stat ID'),
-      'description' => t('The stat ID.'),
+      'label' => $this->t('Stat ID'),
+      'description' => $this->t('The stat ID.'),
       'type' => 'integer_field',
       'read-only' => TRUE,
     );
     $properties['method'] = array(
-      'label' => t('Method'),
-      'description' => t('The stat method.'),
+      'label' => $this->t('Method'),
+      'description' => $this->t('The stat method.'),
       'type' => 'string_field',
       'read-only' => TRUE,
     );
     $properties['created'] = array(
-      'label' => t('Created'),
-      'description' => t('The time that the stat was created.'),
+      'label' => $this->t('Created'),
+      'description' => $this->t('The time that the stat was created.'),
       'type' => 'integer_field',
     );
 
@@ -147,6 +153,19 @@ class Stat extends ContentEntityBase implements \IteratorAggregate, StatInterfac
         $this->set($id, $instance->execute());
       }
     }
+  }
+
+  /**
+   * Translates a string to the current language or to a given language.
+   * @see t()
+   */
+  protected function t($string, array $args = array(), array $options = array()) {
+    // @todo This desperately needs to be injected, but can't be until this
+    // issue is resolved: https://drupal.org/node/2015535
+    if (empty($this->stringTranslation)) {
+      $this->stringTranslation = \Drupal::translation();
+    }
+    return $this->stringTranslation->translate($string, $args, $options);
   }
 
 }

@@ -9,6 +9,7 @@ namespace Drupal\sapi;
 
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\TranslationInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -40,21 +41,35 @@ abstract class StatPluginMethodBase extends PluginBase implements StatPluginMeth
   protected $request;
 
   /**
+   * The string translation service.
+   * @var \Drupal\Core\StringTranslation\TranslationInterface
+   */
+  protected $stringTranslation;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, PluginManagerInterface $entityManager, Request $request) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, PluginManagerInterface $entityManager, Request $request, TranslationInterface $stringTranslation) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->configuration += $this->getPluginDefinition();
     $this->request = $request;
     $this->entityManager = $entityManager;
+    $this->stringTranslation = $stringTranslation;
   }
 
   /**
    * Implements \Drupal\Core\Plugin\ContainerFactoryPluginInterface::create().
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, array $plugin_definition) {
-    return new static($configuration, $plugin_id, $plugin_definition, $container->get('plugin.manager.entity'), $container->get('request'));
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('plugin.manager.entity'),
+      $container->get('request'),
+      $container->get('string_translation')
+    );
   }
 
   /**
@@ -188,43 +203,43 @@ abstract class StatPluginMethodBase extends PluginBase implements StatPluginMeth
     // Global stat method configuration configurations.
     $form['settings']['basic'] = array(
       '#type' => 'details',
-      '#title' => t('Basic details'),
+      '#title' => $this->t('Basic details'),
       '#collapsed' => TRUE,
       '#group' => 'settings',
       '#weight' => 0,
     );
 
     $form['settings']['basic']['label'] = array(
-      '#title' => t('Label'),
+      '#title' => $this->t('Label'),
       '#type' => 'textfield',
       '#default_value' => $config['label'],
-      '#description' => t('The human-readable name of this stat method.'),
+      '#description' => $this->t('The human-readable name of this stat method.'),
       '#required' => TRUE,
       '#size' => 30,
     );
 
     $form['settings']['basic']['status'] = array(
-      '#title' => t('%method data collection enabled', array('%method' => $config['label'])),
+      '#title' => $this->t('%method data collection enabled', array('%method' => $config['label'])),
       '#type' => 'checkbox',
       '#default_value' =>  $config['status'],
     );
 
     $form['settings']['basic']['description'] = array(
-      '#title' => t('Description'),
+      '#title' => $this->t('Description'),
       '#type' => 'textarea',
       '#default_value' =>  $config['description'],
-      '#description' => t('Describe this statistics method.'),
+      '#description' => $this->t('Describe this statistics method.'),
     );
 
     // Global stat method restriction configurations.
     $form['settings']['restrictions'] = array(
       '#type' => 'details',
-      '#title' => t('Restrictions'),
+      '#title' => $this->t('Restrictions'),
       '#group' => 'settings',
     );
 
     $form['settings']['restrictions']['dnt'] = array(
-      '#title' => t('Respect the "Do Not Track" header'),
+      '#title' => $this->t('Respect the "Do Not Track" header'),
       '#type' => 'checkbox',
       '#default_value' => $this->getModuleConfig('sapi', 'dnt'),
     );
@@ -232,16 +247,16 @@ abstract class StatPluginMethodBase extends PluginBase implements StatPluginMeth
     // Global stat method data management configurations.
     $form['settings']['management'] = array(
       '#type' => 'details',
-      '#title' => t('Data management'),
+      '#title' => $this->t('Data management'),
       '#group' => 'settings',
     );
 
     $form['settings']['management']['retention_length'] = array(
-      '#title' => t('Data retention'),
+      '#title' => $this->t('Data retention'),
       '#type' => 'select',
-      '#options' => drupal_map_assoc(array(3600, 21600, 43200, 86400, 604800, 1209600, 2592000, 5184000, 15552000, 31536000), 'format_interval') + array(0 => t('Indefinite')),
+      '#options' => drupal_map_assoc(array(3600, 21600, 43200, 86400, 604800, 1209600, 2592000, 5184000, 15552000, 31536000), 'format_interval') + array(0 => $this->t('Indefinite')),
       '#default_value' => (int) $this->getModuleConfig('sapi', 'retention_length'),
-      '#description' => t('Data older than this interval will be automatically discarded.'),
+      '#description' => $this->t('Data older than this interval will be automatically discarded.'),
     );
 
     // Add plugin-specific settings for this statistics method.
@@ -416,6 +431,14 @@ abstract class StatPluginMethodBase extends PluginBase implements StatPluginMeth
         return isset($config[$module][$key]) ? $config[$module][$key] : FALSE;
       }
     }
+  }
+
+  /**
+   * Translates a string to the current language or to a given language.
+   * @see t()
+   */
+  protected function t($string, array $args = array(), array $options = array()) {
+    return $this->stringTranslation->translate($string, $args, $options);
   }
 
 }

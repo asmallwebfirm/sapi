@@ -11,6 +11,7 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Entity\EntityFormController;
+use Drupal\Core\StringTranslation\TranslationInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -33,12 +34,19 @@ class StatMethodFormController extends EntityFormController implements Container
   protected $plugin;
 
   /**
+   * The string translation service.
+   * @var \Drupal\Core\StringTranslation\TranslationInterface
+   */
+  protected $stringTranslation;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('module_handler'),
-      $container->get('plugin.manager.sapi.method')
+      $container->get('plugin.manager.sapi.method'),
+      $container->get('string_translation')
     );
   }
 
@@ -50,9 +58,10 @@ class StatMethodFormController extends EntityFormController implements Container
    * @param \Drupal\Component\Plugin\PluginManagerInterface
    *   The statistics method plugin manager.
    */
-  public function __construct(ModuleHandlerInterface $module_handler, PluginManagerInterface $plugin_manager) {
+  public function __construct(ModuleHandlerInterface $module_handler, PluginManagerInterface $plugin_manager, TranslationInterface $stringTranslation) {
     $this->moduleHandler = $module_handler;
     $this->pluginManager = $plugin_manager;
+    $this->stringTranslation = $stringTranslation;
   }
 
   /**
@@ -67,7 +76,7 @@ class StatMethodFormController extends EntityFormController implements Container
    * {@inheritdoc}
    */
   public function form(array $form, array &$form_state) {
-    drupal_set_title(t('Edit %label statistics method', array('%label' => $this->getEntity()->label())), PASS_THROUGH);
+    drupal_set_title($this->t('Edit %label statistics method', array('%label' => $this->getEntity()->label())), PASS_THROUGH);
 
     $form = parent::form($form, $form_state);
     $form += $this->plugin->form($form, $form_state);
@@ -81,7 +90,7 @@ class StatMethodFormController extends EntityFormController implements Container
   protected function actions(array $form, array &$form_state) {
     $actions = parent::actions($form, $form_state);
     unset($actions['delete']);
-    $actions['submit']['#value'] = t('Save statistics method');
+    $actions['submit']['#value'] = $this->t('Save statistics method');
     return $actions;
   }
 
@@ -113,12 +122,20 @@ class StatMethodFormController extends EntityFormController implements Container
     $status = $method->save();
 
     if ($status == SAVED_UPDATED) {
-      drupal_set_message(t('The statistics method %label has been updated.', array('%label' => $method->label())));
+      drupal_set_message($this->t('The statistics method %label has been updated.', array('%label' => $method->label())));
       $form_state['redirect'] = 'admin/config/statistics/methods';
     }
     else {
-      drupal_set_message(t('There was a problem saving changes to the %label statistics method.', array('%label' => $method->label())), 'error');
+      drupal_set_message($this->t('There was a problem saving changes to the %label statistics method.', array('%label' => $method->label())), 'error');
     }
+  }
+
+  /**
+   * Translates a string to the current language or to a given language.
+   * @see t()
+   */
+  protected function t($string, array $args = array(), array $options = array()) {
+    return $this->stringTranslation->translate($string, $args, $options);
   }
 
 }

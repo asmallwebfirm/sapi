@@ -10,6 +10,7 @@ namespace Drupal\sapi\Form;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Routing\RouteProviderInterface;
+use Drupal\Core\StringTranslation\TranslationInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -37,14 +38,21 @@ class StatMethodToggleStatus extends EntityConfirmFormBase implements ContainerI
   protected $toggle;
 
   /**
+   * The string translation service.
+   * @var \Drupal\Core\StringTranslation\TranslationInterface
+   */
+  protected $stringTranslation;
+
+  /**
    * Constructs a new NodeTypeDeleteConfirm object.
    *
    * @param \Drupal\Core\Database\Connection $database
    *   The database connection.
    */
-  public function __construct(Request $request, RouteProviderInterface $routeProvider) {
+  public function __construct(Request $request, RouteProviderInterface $routeProvider, TranslationInterface $stringTranslation) {
     $this->request = $request;
     $this->routeProvider = $routeProvider;
+    $this->stringTranslation = $stringTranslation;
     $path_parts = explode('/', $this->request->getPathInfo());
     $this->toggle = array_pop($path_parts);
   }
@@ -55,7 +63,8 @@ class StatMethodToggleStatus extends EntityConfirmFormBase implements ContainerI
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('request'),
-      $container->get('router.route_provider')
+      $container->get('router.route_provider'),
+      $container->get('string_translation')
     );
   }
 
@@ -64,10 +73,10 @@ class StatMethodToggleStatus extends EntityConfirmFormBase implements ContainerI
    */
   public function getQuestion() {
     if ($this->toggle == 'disable') {
-      return t('Are you sure you want to disable the %method statistics method?', array('%method' => $this->entity->label()));
+      return $this->t('Are you sure you want to disable the %method statistics method?', array('%method' => $this->entity->label()));
     }
     else {
-      return t('Are you sure you want to enable the %method statistics method?', array('%method' => $this->entity->label()));
+      return $this->t('Are you sure you want to enable the %method statistics method?', array('%method' => $this->entity->label()));
     }
   }
 
@@ -109,10 +118,10 @@ class StatMethodToggleStatus extends EntityConfirmFormBase implements ContainerI
    */
   public function getConfirmText() {
     if ($this->toggle == 'disable') {
-      return t('Disable');
+      return $this->t('Disable');
     }
     else {
-      return t('Enable');
+      return $this->t('Enable');
     }
   }
 
@@ -129,15 +138,15 @@ class StatMethodToggleStatus extends EntityConfirmFormBase implements ContainerI
 
     // Don't let the user enable that which is already enabled (or vice versa).
     if ($status == $states[$this->toggle]) {
-      drupal_set_title(t('There was a problem processing your request'), PASS_THROUGH);
+      drupal_set_title($this->t('There was a problem processing your request'), PASS_THROUGH);
       if ($status) {
-        $caption = t('You cannot enable the %method statistics method because it is already enabled. Did you mean to <a href="@url">disable it</a>?', array(
+        $caption = $this->t('You cannot enable the %method statistics method because it is already enabled. Did you mean to <a href="@url">disable it</a>?', array(
           '%method' => $this->entity->label(),
           '@url' => url($this->getDisablePath()),
         ));
       }
       else {
-        $caption = t('You cannot disable the %method statistics method because it is already disabled. Did you mean to <a href="@url">enable it</a>?', array(
+        $caption = $this->t('You cannot disable the %method statistics method because it is already disabled. Did you mean to <a href="@url">enable it</a>?', array(
           '%method' => $this->entity->label(),
           '@url' => url($this->getEnablePath()),
         ));
@@ -158,16 +167,24 @@ class StatMethodToggleStatus extends EntityConfirmFormBase implements ContainerI
     $t_args = array('%method' => $this->entity->label());
     if ($saved == SAVED_UPDATED) {
       if ($this->toggle == 'disable') {
-        drupal_set_message(t('The %method statistics method was disabled successfully.', $t_args));
+        drupal_set_message($this->t('The %method statistics method was disabled successfully.', $t_args));
         watchdog('sapi', 'Disabled %method statistics method.', $t_args, WATCHDOG_NOTICE);
       }
       else {
-        drupal_set_message(t('The %method statistics method was enabled successfully.', $t_args));
+        drupal_set_message($this->t('The %method statistics method was enabled successfully.', $t_args));
         watchdog('sapi', 'Enabled %method statistics method.', $t_args, WATCHDOG_NOTICE);
       }
     }
 
     $form_state['redirect'] = $this->getCancelPath();
+  }
+
+  /**
+   * Translates a string to the current language or to a given language.
+   * @see t()
+   */
+  protected function t($string, array $args = array(), array $options = array()) {
+    return $this->stringTranslation->translate($string, $args, $options);
   }
 
 }
