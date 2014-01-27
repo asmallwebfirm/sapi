@@ -7,7 +7,9 @@
 
 namespace Drupal\sapi;
 
+use Drupal\Core\Entity\EntityMalformedException;
 use Drupal\Core\Entity\EntityStorageControllerBase;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -70,9 +72,8 @@ class StatMethodStorageController extends EntityStorageControllerBase {
   /**
    * {@inheritdoc}
    */
-  public static function createInstance(ContainerInterface $container, $entity_type, array $entity_info) {
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_info) {
     return new static(
-      $entity_type,
       $entity_info,
       $container->get('plugin.manager.sapi.method'),
       $container->get('config.factory'),
@@ -84,10 +85,8 @@ class StatMethodStorageController extends EntityStorageControllerBase {
   /**
    * Constructs a StatMethodStorageController object.
    *
-   * @param string $entity_type
-   *   The entity type for which the instance is created.
-   * @param array $entity_info
-   *   An array of entity info for the entity type.
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_info
+   *   The entity info for the entity type.
    * @param \Drupal\Component\Plugin\PluginManagerInterface $manager
    *   The plugin manager to be used.
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
@@ -97,22 +96,15 @@ class StatMethodStorageController extends EntityStorageControllerBase {
    * @param \Drupal\Core\Config\StorageInterface $config_storage
    *   The config storage service.
    */
-  public function __construct($entity_type, array $entity_info, PluginManagerInterface $manager, ConfigFactory $config_factory, ModuleHandlerInterface $module_handler, QueryFactory $entity_query_factory) {
-    parent::__construct($entity_type, $entity_info);
+  public function __construct(EntityTypeInterface $entity_info, PluginManagerInterface $manager, ConfigFactory $config_factory, ModuleHandlerInterface $module_handler, QueryFactory $entity_query_factory) {
+    parent::__construct($entity_info);
 
     $this->manager = $manager;
     $this->configFactory = $config_factory;
     $this->moduleHandler = $module_handler;
     $this->entityQueryFactory = $entity_query_factory;
 
-    // Check if the entity type supports IDs.
-    if (isset($this->entityInfo['entity_keys']['id'])) {
-      $this->idKey = $this->entityInfo['entity_keys']['id'];
-    }
-    else {
-      $this->idKey = FALSE;
-    }
-
+    $this->idKey = $entity_info->getKey('id');
     $this->uuidKey = FALSE;
     $this->revisionKey = FALSE;
   }
@@ -151,10 +143,10 @@ class StatMethodStorageController extends EntityStorageControllerBase {
       }
     }
 
-    // Pass entities built from the plugin manager through $this->attachLoad(),
+    // Pass entities built from the plugin manager through $this->postLoad(),
     // which calls the entity type specific load callback.
     if (!empty($built_entities)) {
-      $this->attachLoad($built_entities);
+      $this->postLoad($built_entities);
       $entities += $built_entities;
     }
 
@@ -217,42 +209,10 @@ class StatMethodStorageController extends EntityStorageControllerBase {
   }
 
   /**
-   * Attaches data to entities upon loading.
-   *
-   * This will attach fields, if the entity is fieldable. It calls
-   * hook_entity_load() for modules which need to add data to all entities.
-   * It also calls hook_TYPE_load() on the loaded entities. For example
-   * hook_node_load() or hook_user_load(). If your hook_TYPE_load()
-   * expects special parameters apart from the queried entities, you can set
-   * $this->hookLoadArguments prior to calling the method.
-   * See Drupal\node\NodeStorageController::attachLoad() for an example.
-   *
-   * @param $queried_entities
-   *   Associative array of query results, keyed on the entity ID.
-   * @param $load_revision
-   *   (optional) TRUE if the revision should be loaded, defaults to FALSE.
-   */
-  protected function attachLoad(&$built_entities, $load_revision = FALSE) {
-    // Call hook_entity_load().
-    foreach ($this->moduleHandler->getImplementations('entity_load') as $module) {
-      $function = $module . '_entity_load';
-      $function($built_entities, $this->entityType);
-    }
-
-    // Call hook_TYPE_load(). The first argument for hook_TYPE_load() are
-    // always the queried entities, followed by additional arguments set in
-    // $this->hookLoadArguments.
-    $args = array_merge(array($built_entities), $this->hookLoadArguments);
-    foreach ($this->moduleHandler->getImplementations($this->entityType . '_load') as $module) {
-      call_user_func_array($module . '_' . $this->entityType . '_load', $args);
-    }
-  }
-
-  /**
    * Implements \Drupal\Core\Entity\EntityStorageControllerInterface::create().
    */
   public function create(array $values) {
-    $entity_class = $this->entityInfo['class'];
+    $entity_class = $this->entityInfo->getClass();
     $entity_class::preCreate($this, $values);
 
     $entity = new $entity_class($values, $this->entityType);
@@ -342,7 +302,7 @@ class StatMethodStorageController extends EntityStorageControllerBase {
    *   The full configuration prefix, for example 'views.view.'.
    */
   public function getConfigPrefix() {
-    return $this->entityInfo['config_prefix'] . '.';
+    return $this->entityInfo->getConfigPrefix() . '.';
   }
 
   /**

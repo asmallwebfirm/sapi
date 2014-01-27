@@ -7,6 +7,7 @@
 
 namespace Drupal\sapi\Tests;
 
+use Drupal\Core\Entity\EntityType;
 use Drupal\Tests\UnitTestCase;
 use Drupal\sapi\StatMethodStorageController;
 
@@ -24,14 +25,10 @@ if (!defined('SAVED_UPDATED')) {
 class StatMethodStorageControllerTest extends UnitTestCase {
 
   /**
-   * The entity type.
-   */
-  protected $entity_type = 'stat_method';
-
-  /**
    * Default entity info for the Stat Method entity.
    */
   protected $entity_info = array(
+    'id' => 'stat_method',
     'class' => 'Drupal\sapi\Entity\StatMethod',
     'config_prefix' => 'sapi.method',
   );
@@ -56,6 +53,7 @@ class StatMethodStorageControllerTest extends UnitTestCase {
    * Tests \Drupal\sapi\StatMethodStorageController::create().
    */
   public function testStorageControllerCreate() {
+    $entity_info = new EntityType($this->entity_info);
     $plugin_manager = $this->getMockBuilder('Drupal\sapi\Plugin\StatPluginManager')
       ->disableOriginalConstructor()
       ->getMock();
@@ -70,17 +68,17 @@ class StatMethodStorageControllerTest extends UnitTestCase {
     // Ensure that the proper hooks are invoked.
     $module_handler->expects($this->at(0))
       ->method('invokeAll')
-      ->with($this->entity_type . '_create');
+      ->with($entity_info->id() . '_create');
     $module_handler->expects($this->at(1))
       ->method('invokeAll')
       ->with('entity_create');
 
     // Use the controller to create a Stat Method entity.
-    $controller = new StatMethodStorageController($this->entity_type, $this->entity_info, $plugin_manager, $config_factory, $module_handler, $query_factory);
+    $controller = new StatMethodStorageController($entity_info, $plugin_manager, $config_factory, $module_handler, $query_factory);
     $entity = $controller->create($this->entity_defaults);
 
     // Ensure the resulting entity makes sense.
-    $this->assertEquals($this->entity_info['class'], get_class($entity));
+    $this->assertEquals($entity_info->getClass(), get_class($entity));
     $this->assertEquals($this->entity_defaults['status'], $entity->get('status'));
   }
 
@@ -88,6 +86,7 @@ class StatMethodStorageControllerTest extends UnitTestCase {
    * Tests \Drupal\sapi\StatMethodStorageController::save().
    */
   public function testStorageControllerSave() {
+    $entity_info = new EntityType($this->entity_info);
     $plugin_manager = $this->getMockBuilder('Drupal\sapi\Plugin\StatPluginManager')
       ->disableOriginalConstructor()
       ->getMock();
@@ -102,11 +101,11 @@ class StatMethodStorageControllerTest extends UnitTestCase {
       ->disableOriginalConstructor()
       ->getMock();
     $stat_method = $this->getMockBuilder('Drupal\sapi\Entity\StatMethod')
-      ->setConstructorArgs(array($this->entity_defaults, $this->entity_type))
+      ->setConstructorArgs(array($this->entity_defaults, $entity_info->id()))
       ->getMock();
 
     // Instantiate the controller early; we need it for some assertions.
-    $controller = new StatMethodStorageController($this->entity_type, $this->entity_info, $plugin_manager, $config_factory, $module_handler, $query_factory);
+    $controller = new StatMethodStorageController($entity_info, $plugin_manager, $config_factory, $module_handler, $query_factory);
 
     // The stat method should return a non-null/empty ID.
     $stat_method->expects($this->any())
@@ -140,13 +139,13 @@ class StatMethodStorageControllerTest extends UnitTestCase {
       ->with($controller, TRUE);
     $module_handler->expects($this->at(0))
       ->method('invokeAll')
-      ->with($this->entity_type . '_presave');
+      ->with($entity_info->id() . '_presave');
     $module_handler->expects($this->at(1))
       ->method('invokeAll')
       ->with('entity_presave');
     $module_handler->expects($this->at(2))
       ->method('invokeAll')
-      ->with($this->entity_type . '_update');
+      ->with($entity_info->id() . '_update');
     $module_handler->expects($this->at(3))
       ->method('invokeAll')
       ->with('entity_update');
@@ -163,6 +162,7 @@ class StatMethodStorageControllerTest extends UnitTestCase {
    * Tests \Drupal\sapi\StatMethodStorageController::loadMultiple().
    */
   public function testStorageControllerLoadMultiple() {
+    $entity_info = new EntityType($this->entity_info);
     $plugin_manager = $this->getMockBuilder('Drupal\sapi\Plugin\StatPluginManager')
       ->disableOriginalConstructor()
       ->getMock();
@@ -182,7 +182,7 @@ class StatMethodStorageControllerTest extends UnitTestCase {
     // Ensure the module handler invokes the proper hooks.
     $module_handler->expects($this->at(0))
       ->method('invokeAll')
-      ->with($this->entity_type . '_create');
+      ->with($entity_info->id() . '_create');
     $module_handler->expects($this->at(1))
       ->method('invokeAll')
       ->with('entity_create');
@@ -192,11 +192,11 @@ class StatMethodStorageControllerTest extends UnitTestCase {
       ->will($this->returnValue(array()));
     $module_handler->expects($this->at(3))
       ->method('getImplementations')
-      ->with($this->entity_type . '_load')
+      ->with($entity_info->id() . '_load')
       ->will($this->returnValue(array()));
 
     // Use the controller to load multiple stat method entities.
-    $controller = new StatMethodStorageController($this->entity_type, $this->entity_info, $plugin_manager, $config_factory, $module_handler, $query_factory);
+    $controller = new StatMethodStorageController($entity_info, $plugin_manager, $config_factory, $module_handler, $query_factory);
     $entities = $controller->loadMultiple(array($this->entity_defaults['id']));
 
     // Ensure the correct entity was loaded.
@@ -209,6 +209,7 @@ class StatMethodStorageControllerTest extends UnitTestCase {
    * Tests \Drupal\sapi\StatMethodStorageController ancillary load methods.
    */
   public function testStorageControllerAncillaryLoads() {
+    $entity_info = new EntityType($this->entity_info);
     $plugin_manager = $this->getMockBuilder('Drupal\sapi\Plugin\StatPluginManager')
       ->disableOriginalConstructor()
       ->getMock();
@@ -231,7 +232,7 @@ class StatMethodStorageControllerTest extends UnitTestCase {
       ->will($this->returnValue(array()));
 
     // Use the controller to load multiple stat method entities.
-    $controller = new StatMethodStorageController($this->entity_type, $this->entity_info, $plugin_manager, $config_factory, $module_handler, $query_factory);
+    $controller = new StatMethodStorageController($entity_info, $plugin_manager, $config_factory, $module_handler, $query_factory);
     $entities = $controller->loadMultiple(array($this->entity_defaults['id']));
 
     // Ensure that a non-existent entity is not loaded.
@@ -255,6 +256,7 @@ class StatMethodStorageControllerTest extends UnitTestCase {
    * Tests \Drupal\sapi\StatMethodStorageController query handling.
    */
   public function testStorageControllerQueryHandling() {
+    $entity_info = new EntityType($this->entity_info);
     $plugin_manager = $this->getMockBuilder('Drupal\sapi\Plugin\StatPluginManager')
       ->disableOriginalConstructor()
       ->getMock();
@@ -269,14 +271,14 @@ class StatMethodStorageControllerTest extends UnitTestCase {
     // Ensure the query factory is used properly.
     $query_factory->expects($this->any())
       ->method('get')
-      ->with($this->entity_type, 'AND')
+      ->with($entity_info->id(), 'AND')
       ->will($this->returnValue(TRUE));
 
     // Use the controller to test query handling.
-    $controller = new StatMethodStorageController($this->entity_type, $this->entity_info, $plugin_manager, $config_factory, $module_handler, $query_factory);
+    $controller = new StatMethodStorageController($entity_info, $plugin_manager, $config_factory, $module_handler, $query_factory);
 
     // Ensure the correct config prefix is returned.
-    $this->assertEquals($this->entity_info['config_prefix'] . '.', $controller->getConfigPrefix());
+    $this->assertEquals($entity_info->getConfigPrefix() . '.', $controller->getConfigPrefix());
 
     // Ensure the correct query service name is returned.
     $this->assertEquals('entity.query.config', $controller->getQueryServicename());

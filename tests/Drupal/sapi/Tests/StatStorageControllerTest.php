@@ -7,6 +7,7 @@
 
 namespace Drupal\sapi\Tests;
 
+use Drupal\Core\Entity\EntityType;
 use Drupal\sapi\StatStorageController;
 use Drupal\Tests\UnitTestCase;
 
@@ -37,6 +38,7 @@ class StatStorageControllerTest extends UnitTestCase {
    * Default entity info for the Stat entity.
    */
   protected $entity_info = array(
+    'id' => 'stat',
     'class' => 'Drupal\sapi\Entity\Stat',
   );
 
@@ -44,6 +46,8 @@ class StatStorageControllerTest extends UnitTestCase {
    * Tests \Drupal\sapi\StatStorageController::loadByConditionalProperties().
    */
   public function testloadByConditionalProperties() {
+    $entity_info = new EntityType($this->entity_info);
+
     // Stub database connection.
     $db = $this->getMockBuilder('Drupal\Core\Database\Connection')
       ->disableOriginalConstructor()
@@ -72,7 +76,7 @@ class StatStorageControllerTest extends UnitTestCase {
 
     // Instantiate a mock of our StatStorageController.
     $controller = $this->getMockBuilder('Drupal\sapi\StatStorageController')
-      ->setConstructorArgs(array('stat', $this->entity_info, $db, $uuid, $eq))
+      ->setConstructorArgs(array($entity_info, $db, $uuid, $eq))
       ->setMethods(array('loadMultiple'))
       ->getMock();
 
@@ -90,6 +94,7 @@ class StatStorageControllerTest extends UnitTestCase {
    * Tests \Drupal\sapi\StatStorageController::ensureProperty().
    */
   public function testEnsureProperty() {
+    $entity_info = new EntityType($this->entity_info);
     $plugin_id = key($this->condition_values);
     $plugin_schema = $this->condition_values[$plugin_id];
 
@@ -122,7 +127,7 @@ class StatStorageControllerTest extends UnitTestCase {
       ->will($this->returnValue($schema));
 
     // Instantiate and test the method.
-    $controller = new StatStorageController('stat', $this->entity_info, $db, $uuid, $eq);
+    $controller = new StatStorageController($entity_info, $db, $uuid, $eq);
     $controller->ensureProperty($plugin_id, $plugin_schema);
   }
 
@@ -130,8 +135,8 @@ class StatStorageControllerTest extends UnitTestCase {
    * Tests \Drupal\sapi\StatStorageController::ensureNoProperty().
    */
   public function testEnsureNoProperty() {
+    $entity_info = new EntityType($this->entity_info);
     $plugin_id = key($this->condition_values);
-    $plugin_schema = $this->condition_values[$plugin_id];
 
     // Stub database connection.
     $db = $this->getMockBuilder('Drupal\Core\Database\Connection')
@@ -162,7 +167,7 @@ class StatStorageControllerTest extends UnitTestCase {
       ->will($this->returnValue($schema));
 
     // Instantiate and test the method.
-    $controller = new StatStorageController('stat', $this->entity_info, $db, $uuid, $eq);
+    $controller = new StatStorageController($entity_info, $db, $uuid, $eq);
     $controller->ensureNoProperty($plugin_id);
   }
 }

@@ -9,6 +9,7 @@ namespace Drupal\sapi;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\DatabaseStorageController;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Component\Uuid\UuidInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -31,9 +32,8 @@ class StatStorageController extends DatabaseStorageController implements StatSto
   /**
    * {@inheritdoc}
    */
-  public static function createInstance(ContainerInterface $container, $entity_type, array $entity_info) {
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_info) {
     return new static(
-      $entity_type,
       $entity_info,
       $container->get('database'),
       $container->get('uuid'),
@@ -44,17 +44,15 @@ class StatStorageController extends DatabaseStorageController implements StatSto
   /**
    * Constructs a StatDataStorageController object.
    *
-   * @param string $entity_type
-   *   The entity type for which the instance is created.
-   * @param array $entity_info
-   *   An array of entity info for the entity type.
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_info
+   *   The entity info for the entity type.
    * @param \Drupal\Core\Database\Connection
    *   The Database connection to be used.
    * @param \Drupal\Core\Entity\Query\QueryFactory $entity_query
    *   The Entity Query factory service to be used.
    */
-  public function __construct($entity_type, array $entity_info, Connection $connection, UuidInterface $uuid_service, QueryFactory $query_factory) {
-    parent::__construct($entity_type, $entity_info, $connection, $uuid_service);
+  public function __construct(EntityTypeInterface $entity_info, Connection $connection, UuidInterface $uuid_service, QueryFactory $query_factory) {
+    parent::__construct($entity_info, $connection, $uuid_service);
     $this->query_factory = $query_factory;
   }
 
