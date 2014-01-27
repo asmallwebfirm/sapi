@@ -1,7 +1,7 @@
 services:
   plugin.manager.sapi.method:
     class: Drupal\sapi\Plugin\StatPluginManager
-    arguments: [method, '@container.namespaces', '@plugin.manager.entity', '@config.factory']
+    arguments: [method, '@container.namespaces', '@entity.manager', '@config.factory']
   plugin.manager.sapi.data:
     class: Drupal\sapi\Plugin\StatPluginManager
-    arguments: [data, '@container.namespaces', '@plugin.manager.entity', '@config.factory']
+    arguments: [data, '@container.namespaces', '@entity.manager', '@config.factory']

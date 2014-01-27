@@ -66,7 +66,7 @@ abstract class StatPluginMethodBase extends PluginBase implements StatPluginMeth
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('plugin.manager.entity'),
+      $container->get('entity.manager'),
       $container->get('request'),
       $container->get('string_translation')
     );
