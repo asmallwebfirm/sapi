@@ -57,13 +57,6 @@ class StatPluginManager extends PluginManagerBase {
     $this->discovery = new CacheDecorator($this->discovery, 'sapi:' . $type, 'cache');
 
     $this->factory = new ContainerFactory($this);
-
-    $this->defaults += array(
-      'parent' => 'parent',
-      'plugin_type' => $type,
-      'module' => 'sapi',
-      'register_theme' => FALSE,
-    );
   }
 
 }

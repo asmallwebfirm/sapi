@@ -83,9 +83,9 @@ class StatMethodAnnotatedClassDiscovery extends AnnotatedClassDiscovery {
   protected function getDefinitionsFromConfig($ids = array()) {
     $entity_type = 'stat_method';
     $statMethod = $this->entityManager->getDefinition($entity_type);
-    $config_class = $statMethod['class'];
-    $prefix = $statMethod['config_prefix'] . '.';
-    $id_key = $statMethod['entity_keys']['id'];
+    $config_class = $statMethod->getClass();
+    $prefix = $statMethod->getConfigPrefix() . '.';
+    $id_key = $statMethod->getKey('id');
 
     // Get the names of the configuration entities we are going to load.
     $names = array();
