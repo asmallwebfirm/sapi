@@ -7,6 +7,7 @@
 
 namespace Drupal\sapi\Tests;
 
+use Drupal\Core\Entity\EntityType;
 use Drupal\Tests\UnitTestCase;
 use Drupal\sapi\Plugin\StatMethodAnnotatedClassDiscovery;
 
@@ -40,6 +41,7 @@ class StatMethodAnnotatedClassDiscoveryTest extends UnitTestCase {
    * Tests \Drupal\sapi\StatMethodStorageController::create().
    */
   public function testStorageControllerCreate() {
+    $entity_info = new EntityType($this->entity_definition);
     $entity_manager = $this->getMockBuilder('Drupal\Core\Entity\EntityManager')
       ->disableOriginalConstructor()
       ->getMock();
@@ -55,7 +57,7 @@ class StatMethodAnnotatedClassDiscoveryTest extends UnitTestCase {
     $entity_manager->expects($this->once())
       ->method('getDefinition')
       ->with('stat_method')
-      ->will($this->returnValue($this->entity_definition));
+      ->will($this->returnValue($entity_info));
 
     // Ensure the config mock we return is handled as expected.
     $config->id = 'stat_method_id';
