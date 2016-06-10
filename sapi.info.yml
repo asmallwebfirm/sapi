@@ -1,5 +1,5 @@
-name: Statistics API
+name: Statistics API (version 2)
 type: module
-description: 'Provides a Statistics API for use by other modules.'
-package: Statistics
+description: Statistics API module which provides a base for statistics harvesting through plugins.
 core: 8.x
+package: Statistics
